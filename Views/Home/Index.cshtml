@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewBag.Title = "Dünya Toplam";
+}
+
+<h2>Dünya Toplam</h2>
+
+
+<div id="myDiv1"></div>
+<div id="myDiv2"></div>
+
+
+@section JSKodlari
+{
+    <script type="text/javascript">
+        function GlobalGetir() {
+            var tablo = $("#GlobalTablo");
+            // tablo.empty();
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://localhost:44330/api/Global",
+                "method": "GET"
+            }
+            console.log("Hello");
+            var deaths;
+            var confirmed;
+            var recovered;
+
+            $.ajax(settings).done(function(response) {
+                console.log(response[0].Id)
+
+                for (var i = 0; i < response.length; i++) {
+                    deaths = response[i].TotalDeaths;
+                    confirmed = response[i].TotalConfirmed;
+                    recovered = response[i].TotalRecovered;
+                    newdeaths = response[i].NewDeaths;
+                    newconfirmed = response[i].NewConfirmed;
+                    newrecovered = response[i].NewRecovered;
+                    console.log("done");
+                }
+            }).done(() => {
+                var trace1 = {
+                    x: ['Ölümler', 'Tespit Edilenler', 'İyileşenler'],
+                    y: [deaths, confirmed, recovered],
+                    type: 'bar',
+                    name:""
+                };
+                var trace2 = {
+                    x: ['Yeni Ölümler', 'Yeni Tespit Edilenler', 'Yeni İyileşenler'],
+                    y: [newdeaths, newconfirmed, newrecovered],
+                    type: 'bar',
+                    name:""
+                };
+                var data = [trace1, trace2];
+
+                var layout = {
+                    title: 'Dünya'
+                };
+
+                Plotly.newPlot('myDiv1', data, layout);
+            });
+
+
+        }
+
+        function CountriesGetir() {
+            var tablo = $("#CountriesTablo");
+            // tablo.empty();
+            var div = $("#myDiv2");
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://localhost:44330/api/Countries",
+                "method": "GET"
+            }
+            console.log("Hello");
+            var response;
+
+            $.ajax(settings).done(function(resp) {
+                response = resp;
+                for (var i = 0; i < resp.length; i++) {
+
+                    div.append("<div id=div" + i.toString() + "></div>");
+
+                    deaths = resp[i].TotalDeaths;
+                    confirmed = resp[i].TotalConfirmed;
+                    recovered = resp[i].TotalRecovered;
+                    newdeaths = resp[i].NewDeaths;
+                    newconfirmed = resp[i].NewConfirmed;
+                    newrecovered = resp[i].NewRecovered;
+                    var trace1 = {
+                        x: ['Ölümler', 'Tespit Edilenler', 'İyileşenler'],
+                        y: [deaths, confirmed, recovered],
+                        type: 'bar',
+                        name: ""
+                    };
+                    var trace2 = {
+                        x: ['Yeni Ölümler', 'Yeni Tespit Edilenler', 'Yeni İyileşenler'],
+                        y: [newdeaths, newconfirmed, newrecovered],
+                        type: 'bar',
+                        name: ""
+                    };
+                    var data = [trace1, trace2];
+
+
+                    var layout = {
+                        title: resp[i].Country
+                    };
+
+                    Plotly.newPlot('div' + i.toString(), data, layout);
+
+
+                    console.log(i);
+
+
+                }
+            });
+
+
+        }
+
+        $(function() {
+            GlobalGetir();
+            CountriesGetir();
+        });
+    </script>
+}

@@ -1,0 +1,121 @@
+﻿
+@{
+    ViewBag.Title = "Türkiye";
+}
+
+<h2>Turkiye</h2>
+
+<div id="plot1"></div>
+<div id="plot2"></div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Confirmed</th>
+            <th>Deaths</th>
+            <th>Recovered</th>
+            <th>Active</th>
+        </tr>
+    </thead>
+    <tbody id="TurkeyTablo">
+    </tbody>
+</table>
+
+
+@section JSKodlari
+{
+    <script type="text/javascript">
+
+        var date = [];
+        var confirmed = [];
+        var deaths = [];
+        var recovered = [];
+        var active = [];
+        var idx = [];
+        var satir;
+        var st = "Hello";
+        var responseLength;
+
+
+        function TurkeyGetir() {
+            var tablo = $("#TurkeyTablo");
+            // tablo.empty();
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://localhost:44330/api/Turkey",
+                "method": "GET"
+            }
+
+
+            $.ajax(settings).done(function(res) {
+                console.log(res[0].Id);
+                last = res.length;
+                for (var i = 0; i < res.length; i++) {
+
+                    idx.push(i);
+                    satir = "<tr><td>" + idx[i] + "</td><td>" + res[i].Date + "</td><td>" + res[i].Confirmed + "</td><td>" + res[i].Deaths + "</td><td>" + res[i].Recovered + "</td><td>" + res[i].Active + "</td></tr>";
+                    tablo.append(satir);
+                    date.push(res[i].Date);
+                    confirmed.push(res[i].Confirmed);
+                    deaths.push(res[i].Deaths);
+                    recovered.push(res[i].Recovered);
+                    active.push(res[i].Active);
+                }
+            }).done(() => {
+                var layout = {
+                    title: 'Kümülatif Grafik'
+                }
+                Plotly.newPlot('plot1', [scatter(idx, deaths, 'Ölümler'), scatter(idx, recovered, 'İyileşenler'), scatter(idx, confirmed, 'Tespit Edilenler')], layout);
+            }).done(() => {
+                    var settings = {
+                        "async": true,
+                        "crossDomain": true,
+                        "url": "https://localhost:44330/api/Countries",
+                        "method": "GET"
+                    }
+
+
+                    $.ajax(settings).done(function(res) {
+                        resp = res[168];
+                        var trace1 = {
+                            x: ['Ölümler', 'Tespit Edilenler', 'İyileşenler'],
+                            y: [deaths[last - 1], confirmed[last - 1], recovered[last - 1]],
+                            type: 'bar'
+                        };
+
+                        var data = [trace1];
+
+                        var layout = {
+                            title: 'Bugün'
+                        };
+
+                        Plotly.newPlot('plot2', data, layout);
+                    });
+                }
+            );
+
+        }
+
+        function scatter(x, y, name) {
+            var trace = {
+                y: y,
+                x: x,
+                name: name,
+                type: 'scatter'
+            };
+            return trace;
+        }
+
+
+        //$(function () {
+
+
+        TurkeyGetir();
+
+
+        //});
+    </script>
+}
